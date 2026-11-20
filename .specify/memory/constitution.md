@@ -1,3 +1,10 @@
+<!--
+Sync Impact Report
+- Version : 2.0.0 → 2.1.0 (MINEURE : règle ajoutée)
+- Principe modifié : III. Nommage (règle ajoutée sur les noms de branches et les messages de commit ;
+  les deux règles sur la forme des noms fusionnées en une seule, sans changement de sens)
+- Templates : aucun changement requis
+-->
 # Constitution SAE-Allonzy
 
 ## Principes fondamentaux
@@ -31,19 +38,23 @@
 ### II. Architecture
 
 - Tout le code est dans un seul dépôt : l’application mobile dans apps/mobile/, l’API dans
-  apps/api/, et les types et formats de données échangés entre les deux dans packages/shared/.
+  apps/api/, et les types et formats de données échangés entre les deux dans packages/contracts/.
   L’application n’importe jamais l’API, et l’API n’importe jamais l’application.
 
-- Côté application, un nouvel écran est un fichier du dossier app/ qui ne contient ni logique
-  métier ni appel réseau. Le code d’une fonctionnalité va dans src/features/<domaine>/. Une
-  feature n’importe jamais une autre feature : le code commun va dans src/components/ ou src/lib/.
+- Dans l’application comme dans l’API, le code est rangé dans src/core/ (démarrage),
+  src/features/<domaine>/ (tout le code d’une fonctionnalité) et src/shared/ (code commun). Une
+  feature n’importe jamais une autre feature, et src/shared/ n’importe jamais une feature : le code
+  utilisé par plusieurs features va dans src/shared/.
 
-- Côté API, une nouvelle route s’écrit dans src/modules/<domaine>/, avec un fichier de routes, un
-  contrôleur qui lit la requête et appelle le service, et un service qui porte les règles métier.
-  Un contrôleur n’accède jamais directement à la base de données.
+- Côté application, un nouvel écran s’écrit dans src/features/<domaine>/screens/, et son fichier
+  du dossier app/ ne fait que l’exporter. Un écran ou un composant n’appelle jamais l’API : il
+  passe par un hook de hooks/, qui passe par data/, et les calculs métier vont dans domain/, sans
+  React ni appel réseau.
 
-- Chaque feature de l’application et chaque module de l’API a un dossier __tests__/. Le test d’un
-  fichier X.ts s’appelle __tests__/X.test.ts.
+- Côté API, une nouvelle route s’écrit dans src/features/<domaine>/, avec un fichier de routes, un
+  contrôleur qui lit la requête et appelle le service, et un service qui porte les règles métier ;
+  un contrôleur n’accède jamais directement à la base de données. Chaque dossier qui contient du
+  code a son dossier __tests__/, où le test d’un fichier X.ts s’appelle X.test.ts.
 
 ### III. Nommage
 
@@ -58,12 +69,13 @@
   créneau slot, trajet itinerary, lieu place.
 
 - Les composants, types et modèles Prisma sont en PascalCase au singulier (Expense), les fonctions
-  et variables en camelCase, les constantes en UPPER_SNAKE_CASE ; un fichier porte le nom de ce
-  qu'il exporte (ExpenseCard.tsx, useExpenses.ts), sauf les fichiers d'un module API, nommés
-  <domaine>.<rôle>.ts.
+  en camelCase commençant par un verbe (createExpense), les booléens par is, has ou can, les
+  constantes en UPPER_SNAKE_CASE ; un fichier porte le nom de ce qu'il exporte (ExpenseCard.tsx),
+  sauf les fichiers d'une feature de l'API (<domaine>.<rôle>.ts), et un dossier de domaine est au
+  pluriel en minuscules (expenses, groups).
 
-- Une fonction commence toujours par un verbe (createExpense, removeMember), un booléen par is,
-  has ou can, et un dossier de domaine est au pluriel en minuscules (expenses, groups).
+- Les branches s'appellent feature/<n°>-<nom> ou fix/<n°>-<nom>, et les commits suivent
+  Conventional Commits avec le numéro de ticket (ex. feat(group): création d'un groupe (#12)).
 
 ### IV. Erreurs et données
 
@@ -71,7 +83,7 @@
   API avec son contexte (route, utilisateur, opération), et un catch vide est interdit.
 
 - En cas d’échec, l’API répond toujours avec le bon code HTTP et un corps
-  { error: { code, message } } dont le type est défini dans packages/shared, et n’envoie jamais au
+  { error: { code, message } } dont le type est défini dans packages/contracts, et n’envoie jamais au
   client une trace de pile ni un message de Prisma ou de PostgreSQL.
 
 - Quand une action échoue, l’application affiche toujours à l’utilisateur un message en français
@@ -87,7 +99,7 @@
   dépenses ou le calcul des soldes) est toujours livrée avec ses tests Jest, jamais dans une
   livraison ultérieure.
 
-- Un service d’un module de l’API et une fonction de packages/shared/ ne sont jamais livrés sans
+- Un service d’une feature de l’API et une fonction de packages/contracts/ ne sont jamais livrés sans
   test.
 
 - Le code n’est jamais livré tant qu’un test échoue.
@@ -123,4 +135,4 @@
   MINEURE quand une règle ou une rubrique est ajoutée, CORRECTIVE pour une reformulation sans
   changement de sens.
 
-**Version**: 1.0.0 | **Ratified**: 2026-11-20 | **Last Amended**: 2026-11-20
+**Version**: 2.1.0 | **Ratified**: 2026-11-20 | **Last Amended**: 2026-11-20
